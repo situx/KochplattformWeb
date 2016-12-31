@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    import="de.hsrm.cs.kochplattformweb.postgres.DBConnectionAPI"
+    import="de.hsrm.cs.kochplattformweb.client.AbstractUser"
+    import="java.net.URL"
+    import="java.math.BigInteger"
+    import="scala.math.BigInt"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://java.sun.com/jsf/core" xmlns:h="http://java.sun.com/jsf/html">
+<%DBConnectionAPI client=(DBConnectionAPI)session.getAttribute("client");
+if("1".equals(request.getParameter("ratingsubmit"))){
+	client.setRating(Double.valueOf(request.getParameter("ratingnumber")),request.getParameter("rating"),new BigInt(new BigInteger(request.getParameter("id"))),new BigInt(((AbstractUser)session.getAttribute("user")).getUserid()));
+}%>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title><%/*if(recmsg instanceof Recipe){
+	out.print(((Recipe)recmsg).getName());
+}*/%></title>
+<link rel="stylesheet" type="text/css" href="styles.css"/>
+</head>
+<body>
+<f:view>
+<%@include file="header2.jsp"%>
+<%if("true".equals(session.getAttribute("admin")))
+out.print("<li><a href=\"singlerecipeedit.jsp?id="+request.getParameter("id")+"\">Rezept bearbeiten</a></li>");%></ul>
+</div>
+<div id="content">
+<%=client.getRecipe(new BigInt(new BigInteger(request.getParameter("id"))),true)%>
+<%if(session.getAttribute("user")!=null)
+		out.print("<table><tr><td colspan=\"3\"><form name=\"ratingform\" method=\"post\" action=\"singlerecipe.jsp?"+request.getQueryString()+"\">Bewertung: <input type=\"text\" name=\"ratingnumber\"/><br/><textarea name=\"rating\" cols=\"100%\" rows=\"8\"></textarea><br/><button type=\"submit\" value=\"1\" name=\"ratingsubmit\">Eintragen</button></form></td></tr></table>");%> 
+</div>
+</f:view>
+</body>
+</html>

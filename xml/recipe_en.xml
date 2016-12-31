@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<recipe>
+	<recipe>Recipe:</recipe>
+	<name>Name:</name>
+	<personamount>Number of persons:</personamount>
+	<difficult>Difficult:</difficult>
+	<category>Category:</category>
+	<amount>Number of ingredients:</amount>
+	<time>Preperationtime:</time>
+	<nutrition>Nutrition:</nutrition>
+	<fat>Fat:</fat>
+	<calories>Calories:</calories>
+	<carbohydrates>Carbohydrates:</carbohydrates>
+	<protein>Protein:</protein>
+	<intgrediant>Ingredients:</intgrediant>
+	<praparation>Preparation:</praparation>

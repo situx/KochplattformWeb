@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+#import(de.hsrm.cs.kochplattformweb.db.Ingredient)
+#import(de.hsrm.cs.kochplattformweb.client.Client)
+#import(de.hsrm.cs.kochplattformweb.messages.Message)
+#import(de.hsrm.cs.kochplattformweb.messages.IngredientSetMessage)
+#import(org.fusesource.scalate.servlet.ServletRenderContext._)
+#import(java.util.Set)
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://java.sun.com/jsf/core" xmlns:h="http://java.sun.com/jsf/html">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Kochplattform</title>
+<script src="utils.js" language="Javascript"></script>
+<link rel="stylesheet" type="text/css" href="styles.css"/>
+</head>
+<body>
+${include("connection.ssp")}
+${include("header.ssp")}
+</ul>
+</div>
+<div id="content">
+<p>Bitte w&auml;hlen sie die Zutaten aus die sie im K&uuml;hlschrank haben und klicken anschlie&szlig;end auf Suchen:</p>
+<form name="searchform" action="recipetable.ssp">
+<table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td id="result" width="30%">
+<b>Verf&uuml;gbare Zutaten</b><br/>
+<select multiple="multiple" id="ings" name="ings" style="height:50%; width:100%" size="25">
+<% var client:Client=request.getSession.getAttribute("client").asInstanceOf[Client]
+    var ings:Message=client.getAllIngredients("de");
+%>
+#if ings.isInstanceOf[IngredientSetMessage]
+	<%var ingset:Set[Ingredient] = ings.asInstanceOf[IngredientSetMessage].ingredientSet%>
+	#for (ing:Ingredient <- ingset)
+		<option>${ing.name}</option>
+	#end
+#end
+</select></td><td width="10%" align="center"><input type="button" onclick="move(true)" value=">>"/><br/><br/>
+<input type="button" onclick="move(false)" value="<<"/></td><td width="30%" id="result">
+<b>Gew&auml;hlte Zutaten</b><br/>
+<select multiple="multiple" id="ingselect" name="ingselect" style="height:50%; width:100%" size="25">
+</select></td><td valign="top" align="right" width="25%">
+Rezeptname: <input type="text" style="width:80%" name="recipename"/>
+<input type="hidden" value="0" name="clicked"/><br/><br/>
+<input type="submit" value="Genaue Suche" onclick="document.searchform.clicked.value=0;"/><br/><br/>
+<input type="submit" value="Ungenaue Suche" onclick="document.searchform.clicked.value=1;"/><br/><br/>
+<input type="submit" value="Namenssuche" onclick="document.searchform.clicked.value=2;"/></td></tr></table>
+</form>
+</div>
+</body>
+</html>

@@ -1,0 +1,5 @@
+@encoding utf-8;
+div#menu {float:left;text-align:left;vertical-align:middle;}
+div#content{position:absolute; left:20%; top:17%;}
+td#result{text-align:center;vertical-align:top;}
+body {background-color:#cccccc;}

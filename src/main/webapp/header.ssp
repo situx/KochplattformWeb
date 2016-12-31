@@ -1,0 +1,56 @@
+#import(de.hsrm.cs.kochplattformweb.client.Admin)
+#import(de.hsrm.cs.kochplattformweb.client.MainUser)
+#import(de.hsrm.cs.kochplattformweb.client.AbstractUser)
+#import(de.hsrm.cs.kochplattformweb.messages.Loginmessage)
+#import(de.hsrm.cs.kochplattformweb.messages.ConfirmReport)
+#import(de.hsrm.cs.kochplattformweb.messages.Message)
+#import(org.fusesource.scalate.servlet.ServletRenderContext._)
+<div id="top">
+<table width="100%" border="0" marginwidth="0">
+<tr>
+<td align="left"><img src="logo.png" width="150" height="100"/></td>
+<td align="left"><h1>Kochplattform</h1></td></tr></table>
+</div>
+<div id="menu">   
+<%  var loginmsg:Message;
+	if("1".equals(request.getParameter("login"))){
+		loginmsg=client.sendUser(new Loginmessage(request.getParameter("username"),request.getParameter("password")));
+		if(loginmsg.isInstanceOf[AbstractUser]){
+			if(loginmsg.isInstanceOf[Admin])
+				request.getSession.setAttribute("admin","true");
+			else
+				request.getSession.setAttribute("admin","false");
+		request.getSession.setAttribute("user",loginmsg.asInstanceOf[AbstractUser]);
+		}
+		else
+			out.print("<p style=\"color:red;font-weight:bold;\">Login nicht erfolgreich!</p>");
+}
+if("2".equals(request.getParameter("login"))){
+		loginmsg=client.sendRegistration(new Registration(request.getParameter("username"),request.getParameter("password")));
+		if(loginmsg.isInstanceOf[ConfirmReport]){
+			request.getSession.setAttribute("user", new MainUser(request.getParameter("username"),request.getParameter("password")));
+		}
+		else
+			out.print("<p style=\"color:red;font-weight:bold;\">Registrierung fehlgeschlagen!</p>");
+}
+if("1".equals(request.getParameter("logout"))){
+		client.logOut();
+		request.getSession.setAttribute("user",null);
+		request.getSession.setAttribute("admin",null);
+}%>
+#if request.getSession.getAttribute("user") != null
+	<%var user:AbstractUser=request.getSession.getAttribute("user").asInstanceOf[AbstractUser]%>
+	out.print("Hallo <b>"+user.name"</b><br/>Sie sind nun eingeloggt!");
+	<br/><form method="post" action="${request.getRequestURI()+"?"+request.getQueryString()}"><input type="hidden" name="logout" value="1"/><input type="submit" value="Logout"/></form><ul>
+	#if user.isInstanceOf[Admin] {
+		<li><a href="usermanagement.jsp">Userverwaltung</a></li>
+	#end
+	<li><a href="createrecipe.jsp">Rezept erstellen</a></li>
+	<li><a href="edit.jsp">Userdaten &auml;ndern</a></li>
+#else
+	<form method="post" action="${request.getRequestURI()+"?"+request.getQueryString()}" name="loginform">
+	<table border="0" cellspacing="0"><tr><td>Name:</td><td><input type="text" name="username"/><br/>
+	</td></tr><tr><td>Passwort:</td><td><input type="password" name="password"/></td></tr><tr><td colspan="2" align="right">
+	<input type="hidden" value="0" name="login"/><input type="submit" value="Registrieren" onClick="document.loginform.login.value=2"/><input type="submit" value="Login" onClick="document.loginform.login.value=1"/></td></tr></table></form><ul>
+#end
+<li><a href=\"index.jsp\">Suchansicht</a></li></ul>

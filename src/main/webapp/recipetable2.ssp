@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+#import(java.util.List)
+#import(java.util.Arrays)
+#import(de.hsrm.cs.kochplattformweb.messages.Message)
+#import(de.hsrm.cs.kochplattformweb.messages.ErrorReport)
+#import(org.fusesource.scalate.servlet.ServletRenderContext._)
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://java.sun.com/jsf/core" xmlns:h="http://java.sun.com/jsf/html">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Kochplattform</title>
+<link rel="stylesheet" type="text/css" href="styles.css"/>
+	${include("connection2.ssp")}
+</head>
+<body>
+<f:view>
+${include("header2.ssp")}
+</ul>
+</div>
+<div id="content">
+<h1 align="center">Suchergebnis</h1>
+<%if(request.getParameterValues("ingselect")!=null && Integer.valueOf(request.getParameter("clicked"))!=2 ){
+	out.print("Suchanfrage nach: "); 
+	for(s:String<-request.getParameterValues("ingselect")){
+		out.print(s+" ");
+	}
+	out.print("<br/><br/>");
+}
+out.print(request.getParameterValues(""));
+Integer.valueOf(request.getParameter("clicked")) match{
+	//case 0:msg=client.sendIngredients(new IngredientMessage(true,inglist));break;
+	case 1 => out.print(client.selectraw(Arrays.asList(request.getParameterValues("ingselect"))));
+	case 2 => out.print("Suchanfrage nach: "+request.getParameter("recipename")+"<br/><br/>");out.print(client.getRecipeByName(request.getParameter("recipename"),false));
+	case _ => msg=new ErrorReport("Error",9999);
+}
+
+	var err:ErrorReport=msg.asInstanceOf{ErrorReport};
+	<table border="8" align="center" cellspacing="0" cellpadding="0" style="border-color:red;"><tr><td align="center">Ein Fehler ist aufgetreten!<br/><br/>Fehlercode: ${err.code}<br/>${err.getMessage()}</td></tr></table>
+%>
+<a href="index2.ssp">Zur&uuml;ck</a>
+</div>
+</f:view>
+</body>
+</html>

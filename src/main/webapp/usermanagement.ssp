@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+#import(java.util.List)
+#import(de.hsrm.cs.kochplattformweb.client.AbstractUser)
+#import(de.hsrm.cs.kochplattformweb.client.Admin)
+#import(de.hsrm.cs.kochplattformweb.client.Client)
+#import(de.hsrm.cs.kochplattformweb.messages.Message)
+#import(de.hsrm.cs.kochplattformweb.messages.UserListMessage)
+#import(java.util.LinkedList)
+#import(java.util.Arrays)
+#import(org.fusesource.scalate.servlet.ServletRenderContext._)
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://java.sun.com/jsf/core" xmlns:h="http://java.sun.com/jsf/html">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Userverwaltung</title>
+<link rel="stylesheet" type="text/css" href="styles.css"/>
+	${include("connection.ssp")}
+<% if(request.getParameter("delete")!=null){
+}%>
+</head>
+<body>
+<f:view>
+	${include("header.ssp")}
+<div id="menu">
+</ul>
+</div>
+<div id="content">
+<h1 align="center">Userverwaltung</h1>
+<%var client:Client=request.getSession.getAttribute("client").asInstanceOf[Client];%>
+<%var msg:Message=client.getAllUsers;%>
+#if msg.isInstanceOf[UserListMessage] && "true".equals(request.getSession.getAttribute("admin"))
+	<%var userlist:List[AbstractUser]=msg.asInstanceOf[UserListMessage].userlist;%>
+	<form name="userform" type="post"><table><tr><th>Name</th><th>Passwort</th><th>Userid</th><th>Admin</th></tr>
+	#for user:AbstractUser <- userlist
+		<tr><td>${user.name}</td><td>${user.password}</td><td>${user.id}</td>
+		#if user.isInstanceOf[Admin]
+			<td>true</td><td><button name="adminstatus" value="${user.id} true">Status &auml;ndern</button></td>
+		#else
+			<td>false</td><td><button name="adminstatus" value="${user.id} false">Status &auml;ndern</button></td>
+		<td><button name="delete" value="${user.id} submit">L&ouml;schen</button></td></tr>
+        #end
+	#end
+	</table></form>
+#else
+	<table border="8" align="center" cellspacing="0" cellpadding="0" style="border-color:red;"><tr><td align="center">Sie m&uuml;ssen sich als Administrator einloggen um sich die Userliste anzeigen lassen zu k&ouml;nnen!</td></tr></table>
+#end
+<a href="index.ssp">Zur&uuml;ck</a>
+</div>
+</f:view>
+</body>
+</html>

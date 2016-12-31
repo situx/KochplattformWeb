@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+#import(de.hsrm.cs.kochplattformweb.client.Client)
+#import(de.hsrm.cs.kochplattformweb.db.Recipe)
+#import(de.hsrm.cs.kochplattformweb.db.Ingredient)
+#import(de.hsrm.cs.kochplattformweb.messages.Message)
+#import(de.hsrm.cs.kochplattformweb.messages.IngredientSetMessage)
+#import(org.fusesource.scalate.servlet.ServletRenderContext._)
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://java.sun.com/jsf/core" xmlns:h="http://java.sun.com/jsf/html">
+${include("connection.ssp")}
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Rezept erstellen</title>
+<script src="utils.js" language="Javascript"/>
+<link rel="stylesheet" type="text/css" href="styles.css"/>
+</head>
+<body>
+<f:view>
+	${include("header.ssp")}
+</ul>
+</div>
+	<%var client:Client=request.getSession.getAttribute("client").asInstanceOf[Client];%>
+<div id="content">
+<h1 align="center">Rezept erstellen</h1>
+#if request.getSession.getAttribute("user") != null
+	<form method="post" action="singlerecipe.jsp?id=${request.getParameter("id")}"><table width="100%" border="0" cellspacing="0"><tr><td>Name:</td><td colspan="3"><input type="text" name="name"/></td></tr>
+	<tr><td>Kategorie:</td><td colspan="3"><input type="text" name="category"/></td></tr>
+	<tr><td>Schwierigkeit:</td><td colspan="3"><input type="text" name="difficulty"/></td></tr>
+	<tr><td>Kochzeit:</td><td colspan="3"><input type="text" name="time"/></td></tr>
+	<tr><td>Personenanzahl:</td><td colspan="3"><input type="text" name="zombies"/></td></tr>
+	<tr><td>Zutaten:</td><td width="35%">");
+	<select multiple="multiple" id="ings" name="ings" style=\"height:50%;width:100%\" size=\"25\">
+	<%var ings:Message=client.getAllIngredients("de");%>
+		#if ings.isInstanceOf[IngredientSetMessage]
+			<% ingset:Set[Ingredient] = ings.asInstanceOf[IngredientSetMessage].ingredientSet;%>
+			#for (ing:Ingredient <- ingset)
+				<option>${ing.name}</option>
+			#end
+		#end
+	</select><td width="10%" align="center"><input type="button" onclick="move(true)" value=">>"/><br/><br/>
+	<input type="button" onclick="move(false)" value="<<"/></td><td width=\"35%\"><select multiple="1" id="ingselect" name="ingselect" style="height:50%; width:100%" size="25"/>
+	</td></tr><tr><td>Zubereitung:</td><td colspan="3"><textarea name="preparation" cols="100%" rows="20"></textarea></td></tr>
+	<tr><td>Kalorien: </td><td>
+	<input type="text" name="calories"/></td></tr><tr>
+	<td>Kohlenhydrate:</td><td colspan="3"><input type="text" name="carbohydrates"/></td></tr><tr>
+	<td>Fett:</td><td colspan="3"><input type="text" name="fat"/></td></tr><tr>
+	<td>Proteine:</td><td colspan="3"><input type="text" name="protein"/></td></tr></table>
+	<input type="submit" value="Absenden"/><input type="reset" value="Abbrechen"/></form>
+
+#else
+	<table border="8" align="center" cellspacing="0" cellpadding="0" style="border-color:red;"><tr><td align="center">Sie m&uuml;ssen sich einloggen um ein Rezept erstellen zu k&ouml;nnen!</td></tr></table>
+#end
+</div>
+</f:view>
+</body>
+</html>

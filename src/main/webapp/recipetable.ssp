@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+#import(java.util.LinkedList)
+#import(java.util.List)
+#import(java.util.Arrays)
+#import(de.hsrm.cs.kochplattformweb.db.Ingredient)
+#import(de.hsrm.cs.kochplattformweb.db.RecipeEntry)
+#import(de.hsrm.cs.kochplattformweb.db.Recipe)
+#import(de.hsrm.cs.kochplattformweb.client.Client)
+#import(de.hsrm.cs.kochplattformweb.client.AbstractUser)
+#import(de.hsrm.cs.kochplattformweb.messages.IngredientMessage)
+#import(de.hsrm.cs.kochplattformweb.messages.ErrorReport)
+#import(de.hsrm.cs.kochplattformweb.messages.RecipeListMessage)
+#import(org.fusesource.scalate.servlet.ServletRenderContext._)
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://java.sun.com/jsf/core" xmlns:h="http://java.sun.com/jsf/html">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Kochplattform</title>
+<link rel="stylesheet" type="text/css" href="styles.css"/>
+	${include("connection.ssp")}
+</head>
+<body>
+<f:view>
+	${include("header.ssp")}
+</ul>
+</div>
+<div id="content">
+<h1 align="center">Suchergebnis</h1>
+<% var inglist:List[Ingredient]  = new LinkedList[Ingredient]();%>
+#if request.getParameterValues("ingselect") != null && Integer.valueOf(request.getParameter("clicked")) != 2
+	Suchanfrage nach:
+	#for(s:String <- Arrays.asList(request.getParameterValues("ingselect")))
+		${s}
+		<%inglist.add(new Ingredient(s));%>
+	#end
+	<br/><br/>
+#end
+	#match Integer.valueOf(request.getParameter("clicked"))
+	#case (0) <%msg=client.sendIngredients(new IngredientMessage(true,inglist));%>
+	#case (1) <%msg=client.sendIngredients(new IngredientMessage(false,inglist));%>
+	#case (2) Suchanfrage nach: ${request.getParameter("recipename")}<br/><br/><%msg=client.getRecipeByName(request.getParameter("recipename"));%>
+	#otherwise <%msg=new ErrorReport("Error",9999);%>
+	#end
+}
+#if msg.isInstanceOf[RecipeListMessage]
+	<%var result:List[RecipeEntry]=msg.asInstanceOf[RecipeListMessage].getRecipelist();%>
+	#if result.isEmpty()
+		<table border="8" align="center" cellspacing="0" cellpadding="0" style="border-color:red;"><tr><td align="center">Ihre Suche ergab leider kein Suchergebnis</td></tr></table>
+	#else
+		<table border="1" cellspacing="0" cellpadding="0" align="center" width="100%"><tr><th>Name</th><th>Kategorie</th><th>Zutaten</th><th>Zubereitungszeit</th><th>Personenanzahl</th><th>Bewertung</th></tr>
+		#for(recipe:Recipe <- result)
+			<tr><td id="result"><a href="singlerecipe.ssp?id=${recipe.recipeid}">${recipe.name}</a></td><td id="result">${recipe.category}</td><td>
+			#for(ing:Ingredient <- recipe.ingredients){
+				${ing.name}
+			#end
+			</td><td id="result">${recipe.time}</td><td id="result">${recipe.zombies}</td><td id="result">${recipe.rating}</td></tr>
+		#end
+		</table>
+	#end
+#else{
+	<%var err:ErrorReport=msg.asInstanceOf[ErrorReport];%>
+	<table border="8" align="center" cellspacing="0" cellpadding="0" style="border-color:red;"><tr><td align="center">Ein Fehler ist aufgetreten!<br/><br/>Fehlercode: ${err.code}<br/>${err.message}</td></tr></table>
+#end
+%>
+<a href="index.ssp">Zur&uuml;ck</a>
+</div>
+</f:view>
+</body>
+</html>

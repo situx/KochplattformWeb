@@ -1,0 +1,15 @@
+#import(de.hsrm.cs.kochplattformweb.messages.Message)
+#import(de.hsrm.cs.kochplattformweb.messages.ErrorReport)
+#import(de.hsrm.cs.kochplattformweb.client.Client)
+#import(org.fusesource.scalate.servlet.ServletRenderContext._)
+<%request.setCharacterEncoding("UTF-8");
+var client:Client;
+var msg:Message=new ErrorReport("Fehler",9999);
+if(request.getSession.getAttribute("client").isInstanceOf[Client])
+		client=request.getSession.getAttribute("client").asInstanceOf[Client];
+else{
+	client = new Client("localhost",42006);
+	client.connect;
+    request.getSession.setAttribute("client",client);
+}
+%>

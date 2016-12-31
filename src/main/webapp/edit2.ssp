@@ -1,0 +1,56 @@
+<%@page import="scala.math.BigInt"%>
+#import(org.fusesource.scalate.servlet.ServletRenderContext._)
+#import(de.hsrm.cs.kochplattformweb.client.AbstractUser)
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Userdaten &auml;ndern</title>
+<link rel="stylesheet" type="text/css" href="styles.css"/>
+	${include("connection2.ssp")}
+</head>
+<body>
+	${include("header2.ssp")}
+</ul>
+<div id="content">
+<h1>Benutzerdaten &auml;ndern</h1>
+<% 
+if (request.getSession.getAttribute("user")!=null){
+if("1".equals(request.getParameter("andern"))){
+	if(request.getParameter("username").length()>2){
+	if(request.getParameter("password").length()>4 && request.getParameter("password").equals(request.getParameter("passwordwiederholung"))){
+		boolean ergebnis = false;
+		 if(client.updateUser(request.getParameter("username"),request.getParameter("password"),new BigInt(((AbstractUser)session.getAttribute("user")).getUserid())))
+			out.print("<h3 style=\"color:green;\">Erfolgreich ge&auml;ndert</h3>");
+		else
+			out.print("<h3 style=\"color:red;\">Ein Fehler ist aufgetreten</h3>");
+	}
+	else{
+		if(request.getParameter("password").length()<5){
+			out.print("<h3 style=\"color:red;\">Bitte geben Sie ein Passwort mit mindestens 5 Stellen ein</h3>");
+		}
+		else {
+			out.print("<h3 style=\"color:red;\">Die Passw&ouml;rter stimmen nicht &uuml;berein</h3>");
+			
+		}
+	}
+  }
+	else{
+	  out.print("<h2 style=\"color:red;\">Der Username muss mindestens 3 Stellen haben</h2>");
+    }
+}
+    out.print("<form method=\"post\" action=\""+request.getRequestURI()+"?"+request.getQueryString()+"\" name=\"andern\">");
+	out.print("<table border=\"0\" cellspacing=\"0\"><tr><td>Name:</td><td><input type=\"text\" name=\"username\" value=\""+((AbstractUser)session.getAttribute("user")).name+"\" /><br/>");
+	out.print("</td></tr><tr><td>Passwort:</td><td><input type=\"password\" name=\"password\"/></td></tr> "+
+			"<tr><td>Pw wiederholen:</td><td><input type=\"password\" name=\"passwordwiederholung\"/></td></tr><tr><td colspan=\"2\" align=\"right\">");
+	out.print("<input type=\"hidden\" value=\"0\" name=\"andern\"/><input type=\"submit\" value=\"&Auml;ndern\" onClick=\"document.andern.andern.value=1\"/></td></tr></table></form>");
+	
+}
+else
+{
+	out.print("Bitte loggen Sie sich ein");
+}
+	%>
+</div>
+</body>
+</html>

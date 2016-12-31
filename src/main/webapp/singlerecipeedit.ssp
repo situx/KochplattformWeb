@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+#import(de.hsrm.cs.kochplattformweb.client.Client)
+#import(de.hsrm.cs.kochplattformweb.messages.Message)
+#import(de.hsrm.cs.kochplattformweb.messages.GetRecipeMessage)
+#import(de.hsrm.cs.kochplattformweb.messages.IngredientSetMessage)
+#import(de.hsrm.cs.kochplattformweb.messages.ErrorReport)
+#import(de.hsrm.cs.kochplattformweb.db.Recipe)
+#import(de.hsrm.cs.kochplattformweb.db.Ingredient)
+#import(java.math.BigInteger)
+#import(org.fusesource.scalate.servlet.ServletRenderContext._)
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://java.sun.com/jsf/core" xmlns:h="http://java.sun.com/jsf/html">
+${include("connection.ssp")}
+<%var recmsg:Message=client.getRecipe(new GetRecipeMessage(new BigInteger(request.getParameter("id"))));%>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>
+    #if recmsg.isInstanceOf[Recipe]
+        ${recmsg.asInstanceOf[Recipe].name}
+    #end
+</title>
+<link rel="stylesheet" type="text/css" href="styles.css"/>
+</head>
+<body>
+<f:view>
+	${include("header.ssp")}
+</ul>
+</div>
+<div id="content">
+#if recmsg.isInstanceOf[Recipe] && request.getSession.getAttribute("user") != null
+    <%var currec:Recipe=recmsg.asInstanceOf[Recipe];%>
+    <h1 align="center">Rezept editieren</h1>
+    <form method="post" action="singlerecipe.ssp?id=${request.getParameter("id")}"><table width="100%" border="0" cellspacing="0"><tr><td>Name:</td><td><input type="text" name="name" value="${currec.name}"/></td></tr>
+    <tr><td>Kategorie:</td><td><input type="text" name="category" value="${currec.category}"/></td></tr>
+    <tr><td>Schwierigkeit:</td><td><input type="text" name="difficulty" value="${currec.difficulty}"/></td></tr>
+    <tr><td>Kochzeit:</td><td><input type="text" name="time" value="${currec.time}"/></td></tr>
+    <tr><td>Personenanzahl:</td><td><input type="text" name="zombies" value="${currec.zombies}"/></td></tr>
+    <tr><td>Zutaten:</td><td>
+    <select multiple="1" name="ingselect" style="height:50%" size="25">
+    <%var ings:Message=client.getAllIngredients("de");
+    //if (ings.isInstanceOf[IngredientSetMessage])
+    var ingset:Set[Ingredient] = (ings.asInstanceOf[IngredientSetMessage]).getIngredientsSet();%>
+    #for (ing:Ingredient<-ingset)
+        <option>${ing.name}</option>
+    #end
+   </select><select multiple="1" name="ingselect" style="height:50%" size="25">
+    #for (ing:Ingredient <- currec.ingredients)
+        <option>${ing.amount} ${ing.amountType} ${ing.name}</option>
+    #end
+    </select></td></tr><tr><td>Zubereitung:</td><td><textarea name="preparation" cols="100%" rows="20">${currec.preparation}</textarea></td></tr>
+    <tr><td>Kalorien: </td><td>
+    <input type="text" name="calories" value="${currec.nutrition.getCalories()}"/></td></tr><tr>
+    <td>Kohlenhydrate:</td><td><input type="text" name="carbohydrates" value=""+currec.getNutrition().getCarbohydrates()+""/></td></tr><tr>
+    <td>Fett:</td><td><input type="text" name="fat" value="${currec.getNutrition().getFat()}"/></td></tr><tr>
+    <td>Proteine:</td><td><input type="text" name="protein" value="${currec.getNutrition().getProtein()}"/></td></tr></table>
+    <input type="submit" value="Absenden"/><input type="reset" value="Abbrechen"/></form>
+        #elseif request.getSession.getAttribute("user")==null
+    <table border="8" align="center" cellspacing="0" cellpadding="0" style="border-color:red;"><tr><td align="center">Sie m&uuml;ssen sich einloggen um ein Rezept editieren zu k&ouml;nnen!</td></tr></table>
+        #else
+        <%	var err:ErrorReport=recmsg.asInstanceOf[ErrorReport];%>
+    <table border="8" width="100%" align="center" cellspacing="0" cellpadding="0" style="border-color:red;"><tr><td align="center">Ein Fehler ist aufgetreten!<br/><br/>Fehlercode: ${err.code}<br/>${err.getMessage}</td></tr></table>
+    #end
+</div>
+</f:view>
+</body>
+</html>

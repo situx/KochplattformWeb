@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+#import(de.hsrm.cs.kochplattformweb.client.Client)
+#import(de.hsrm.cs.kochplattformweb.client.AbstractUser)
+#import(de.hsrm.cs.kochplattformweb.db.Recipe)
+#import(de.hsrm.cs.kochplattformweb.db.Ingredient)
+#import(de.hsrm.cs.kochplattformweb.messages.Message)
+#import(de.hsrm.cs.kochplattformweb.messages.ErrorReport)
+#import(de.hsrm.cs.kochplattformweb.messages.GetRecipeMessage)
+#import(de.hsrm.cs.kochplattformweb.db.Nutrition)
+#import(de.hsrm.cs.kochplattformweb.db.Rating)
+#import(org.fusesource.scalate.servlet.ServletRenderContext._)
+#import(java.net.URL)
+#import(java.math.BigInteger)
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://java.sun.com/jsf/core" xmlns:h="http://java.sun.com/jsf/html">
+<%var client:Client=request.getSession.getAttribute("client").asInstanceOf[Client];
+var msg:Message;
+if("1".equals(request.getParameter("ratingsubmit"))){
+	client.setRating(new BigInteger(request.getParameter("id")),new Rating(Double(request.getParameter("ratingnumber")),request.getParameter("rating"), request.getSession.getAttribute("user").asInstanceOf[AbstractUser] .getUserid()));
+}
+var recmsg:Message=client.getRecipe(new GetRecipeMessage(new BigInteger(request.getParameter("id"))));%>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>
+    #if recmsg.isInstanceOf[Recipe]
+	    ${recmsg.asInstanceOf[Recipe].name}
+#end
+</title>
+<link rel="stylesheet" type="text/css" href="styles.css"/>
+</head>
+<body>
+<f:view>
+	${include("header.ssp")}
+#if "true".equals(request.getSession().getAttribute("admin"))
+<li><a href="singlerecipeedit.jsp?id=${request.getParameter("id")}">Rezept bearbeiten</a></li>
+#end
+</ul>
+</div>
+<div id="content">
+#if recmsg.isInstanceOf[Recipe]
+	<%var currec:Recipe=recmsg.asInstanceOf[Recipe];%>
+	<h1 align="center">${currec.name}</h1>
+	<table width="100%"><tr><td>Kategorie:</td><td>${currec.category}</td></tr>
+	<tr><td>Schwierigkeit:</td><td>${currec.difficulty}</td></tr>
+	<tr><td>Kochzeit:</td><td>${currec.time}</td></tr>
+	<tr><td>Personenanzahl:</td><td>${currec.zombies}</td></tr>
+	<tr><td>Durchschnittsbewertung:</td><td>${currec.rating}</td></tr>
+	<tr><td>Zutaten:</td><td><ul>
+	#for(ing:Ingredient<-currec.ingredients)
+		<li>${ing.amount+" "+ing.amountType+" "+ing.name}</li>
+	#end
+	</ul></td></tr><tr><td>Zubereitung:</td><td>${currec.preparation}</td></tr>
+	<tr><td>N&auml;hrwerte:</td><td>
+	Kalorien: ${currec.nutrition.calories}<br/>
+	Kohlenhydrate: ${currec.getNutrition().getCarbohydrates()}<br/>
+	Fett: ${currec.getNutrition().getFat()}<br/>
+	Proteine: ${currec.getNutrition().getProtein()}<br/></td></tr>
+	<tr><td>Weitere Links:</td><td>
+	#for(url:String<-currec.getVideos().keySet())
+		<a href="${currec.getVideos().get(url)}" target="_blank">${url}</a><br/>
+	#end
+	<tr><td colspan="2"><b>Bewertungen:</b></td>
+	#for(rate:Rating<-currec.getRatings())
+		out.print("<tr><td>"+rate.getRatingnumber()+"</td><td>"+rate.getComment()+"</td></tr>");
+	#end
+	#if request.getSession.getAttribute("user") != null
+		<tr><td colspan="3"><form name="ratingform" method="post" action="singlerecipe.jsp?${request.getQueryString()}">Bewertung: <input type="text" name="ratingnumber"/><br/><textarea name="rating" cols="100%" rows="8"></textarea><br/><button type="submit" value="1" name="ratingsubmit">Eintragen</button></form></td></tr>
+#end
+#else
+	<%var err:ErrorReport=recmsg.asInstanceOf[ErrorReport];%>
+	<table border="8" align="center" cellspacing="0" cellpadding="0" style="border-color:red;"><tr><td align="center">Ein Fehler ist aufgetreten!<br/><br/>Fehlercode: ${err.code}<br/>${err.message}</td></tr></table>
+#end
+</div>
+</f:view>
+</body>
+</html>

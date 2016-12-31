@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+#import(java.math.BigInteger)
+#import(org.fusesource.scalate.servlet.ServletRenderContext._)
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://java.sun.com/jsf/core" xmlns:h="http://java.sun.com/jsf/html">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Userverwaltung</title>
+<link rel="stylesheet" type="text/css" href="styles.css"/>
+	${include("connection2.ssp")}
+</head>
+<body>
+<f:view>
+	${include("header2.ssp")}
+<div id="menu">
+</ul>
+</div>
+<div id="content">
+<h1 align="center">Userverwaltung</h1>
+#if request.getParameter("delete") != null {
+	#if(client.deleteUser(new BigInt(new BigInteger(request.getParameter("delete")))))
+		<p style="color:green;font-weight:bold;text-align:center;">User erfolgreich gel&ouml;scht!</p>
+	#else
+		<p style="color:red;font-weight:bold;text-align:center;">User l&ouml;schen fehlgeschlagen!</p>
+        #end
+#end
+    <%
+if(request.getParameter("adminstatus")!=null){
+	String adm=request.getParameter("adminstatus");
+	String status=adm.substring(adm.indexOf(" ")+1);
+	adm=adm.substring(0,adm.indexOf(" "));
+	if("f".equals(status))
+		status="t";
+	else
+		status="f";
+	client.setAdminState(new BigInt(new BigInteger(adm)),status);
+}%>
+#if request.getParameter("password") != null
+	#if client.updatePassword(request.getParameter("password"),new BigInt(new BigInteger(request.getParameter("passbutton"))))
+		<p style="color:green;font-weight:bold;text-align:center;">Password f&uuml;r den User gesetzt!</p>
+	#else
+		<p style="color:red;font-weight:bold;text-align:center;">Password konnte nicht gesetzt werden!</p>
+    #end
+#end
+#if "true".equals(request.getSession.getAttribute("admin"))
+	<table border="0" cellpadding="0" cellspacing="10"><tr style="background-color:#aabbbb"><th>Name</th><th>Passwort</th><th>Userid</th><th>Admin</th><th colspan="2">Optionen</th></tr>
+	${client.getAllUsers()}
+	</table>
+#else
+	<table border="8" align="center" cellspacing="0" cellpadding="0" style="border-color:red;"><tr><td align="center">Sie m&uuml;ssen sich als Administrator einloggen um sich die Userliste anzeigen lassen zu k&ouml;nnen!</td></tr></table>
+
+#end
+</div>
+</f:view>
+</body>
+</html>

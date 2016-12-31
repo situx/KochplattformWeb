@@ -1,0 +1,63 @@
+<%@page import="scala.math.BigInt"
+		import="java.math.BigInteger"
+		import="de.hsrm.cs.kochplattformweb.client.AbstractUser"
+		import="de.hsrm.cs.kochplattformweb.client.Admin"
+		import="de.hsrm.cs.kochplattformweb.client.MainUser"
+%>
+<div id="top">
+<table width="100%" border="0" marginwidth="0">
+<tr>
+<td align="left"><img src="logo.png" width="150" height="100"/></td>
+<td align="left"><h1>Kochplattform</h1></td></tr></table>
+</div>
+<div id="menu">   
+<%  BigInt[] loginmsg;
+	if("1".equals(request.getParameter("login"))){
+		loginmsg=client.login(request.getParameter("username"),request.getParameter("password"));
+		switch(loginmsg[0].intValue()){
+			case 0: out.print("<p style=\"color:red;font-weight:bold;\">Login nicht erfolgreich!</p>");break;
+			case 1: session.setAttribute("admin","false");
+			session.setAttribute("user",new MainUser(request.getParameter("username"),request.getParameter("password"),loginmsg[1].bigInteger()));break;
+			case 2:	session.setAttribute("admin","true");
+			session.setAttribute("user",new Admin(request.getParameter("username"),request.getParameter("password"),loginmsg[1].bigInteger()));break;
+			default: 
+		}	
+}
+if("3".equals(request.getParameter("login"))){
+		if(client.forgotpassword(request.getParameter("username")))
+			out.print("<p style=\"color:red;font-weight:bold;\">Passwort wurde an<br/>Ihre Emailadresse<br/>gesendet!</p>");
+		else
+			out.print("<p style=\"color:red;font-weight:bold;\">Username existiert nicht!</p>");
+}
+if("2".equals(request.getParameter("login"))){
+		loginmsg=client.register(request.getParameter("username"),request.getParameter("password"));
+		if(loginmsg[0].intValue()>0){
+			session.setAttribute("user", new MainUser(request.getParameter("username"),request.getParameter("password"),loginmsg[1].bigInteger()));
+			session.setAttribute("admin","false");
+		}
+		else
+			out.print("<p style=\"color:red;font-weight:bold;\">Registrierung fehlgeschlagen!</p>");
+}
+if("1".equals(request.getParameter("logout"))){
+		if(client.logout()){
+			session.setAttribute("user",null);
+			session.setAttribute("admin",null);
+		}
+}
+if(session.getAttribute("user")!=null){
+	AbstractUser user=(AbstractUser)session.getAttribute("user");
+	out.print("Hallo <b>"+user.name+"</b><br/>Sie sind nun eingeloggt!");
+	out.print("<br/><form method=\"post\" action=\"index2.jsp\"><input type=\"hidden\" name=\"logout\" value=\"1\"/><input type=\"submit\" value=\"Logout\"/></form><ul>");
+	if(user instanceof Admin){
+		out.print("<li><a href=\"usermanagement2.jsp\">Userverwaltung</a></li>");
+	}
+	out.print("<li><a href=\"createrecipe2.jsp\">Rezept erstellen</a></li>");
+	out.print("<li><a href=\"edit2.jsp\">Userdaten &auml;ndern</a></li>");
+}
+else{
+	out.print("<form method=\"post\" action=\""+request.getRequestURI()+"?"+request.getQueryString()+"\" name=\"loginform\">");
+	out.print("<table border=\"0\" cellspacing=\"0\"><tr><td>Name:</td><td><input type=\"text\" name=\"username\"/><br/>");
+	out.print("</td></tr><tr><td>Passwort:</td><td><input type=\"password\" name=\"password\"/></td></tr><tr><td colspan=\"2\" align=\"right\">");
+	out.print("<input type=\"hidden\" value=\"0\" name=\"login\"/><input type=\"submit\" value=\"Registrieren\" onClick=\"document.loginform.login.value=2\"/><input type=\"submit\" value=\"Login\" onClick=\"document.loginform.login.value=1\"/><br/><input type=\"submit\" value=\"Passwort vergessen\" onClick=\"document.loginform.login.value=3\"/></td></tr></table></form><ul>");
+}
+out.print("<li><a href=\"index2.jsp\">Suchansicht</a></li>");%>

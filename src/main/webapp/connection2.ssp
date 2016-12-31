@@ -1,0 +1,12 @@
+#import(de.hsrm.cs.kochplattformweb.postgres.UserAPI)
+#import(de.hsrm.cs.kochplattformweb.postgres.DBConnectionAPI)
+#import(de.hsrm.cs.kochplattformweb.postgres.DBConnection)
+#import(org.fusesource.scalate.servlet.ServletRenderContext._)
+<%request.setCharacterEncoding("UTF-8");
+var client:DBConnection;
+if(request.getSession.getAttribute("client").isInstanceOf[DBConnection])
+		client= request.getSession.getAttribute("client").asInstanceOf[DBConnection] ;
+else{
+	client = new DBConnection();
+	request.getSession.setAttribute("client",client);
+}%>
